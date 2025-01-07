@@ -1,0 +1,50 @@
+Parameters:
+  AllowedCidrBlock:
+    AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$
+    ConstraintDescription: must be a CIDR block range between x.x.x.x\16 and x.x.x.x\32
+    Description: The CIDR block range you want to allow to access the VPC (i.e. home / school I.P. address)
+    Type: String
+  TemplateURL:
+    Type: String
+    Description: The S3 URL of the template.yaml to deploy
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/28
+
+  InternetGatewayStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Join [ '', [ !Ref TemplateURL, '/internet-gateway.yaml' ] ]
+      Parameters:
+        VPC: !Ref VPC
+
+  NetworkAclStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Join [ '', [ !Ref TemplateURL, '/nacl.yaml' ] ]
+      Parameters:
+        AllowedCidrBlock: !Ref AllowedCidrBlock
+        VPC: !Ref VPC
+
+  RouteTableStack:
+    DependsOn: InternetGatewayStack
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Join [ '', [ !Ref TemplateURL, '/routing.yaml' ] ]
+      Parameters:
+        InternetGateway: !GetAtt InternetGatewayStack.Outputs.InternetGateway
+        VPC: !Ref VPC
+
+  SubnetStack:
+    DependsOn: [InternetGatewayStack, NetworkAclStack, RouteTableStack]
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Join [ '', [ !Ref TemplateURL, '/subnets.yaml' ] ]
+      Parameters:
+        NetworkAcl: !GetAtt NetworkAclStack.Outputs.NetworkAcl
+        RouteTable: !GetAtt RouteTableStack.Outputs.RouteTable
+        VPC: !Ref VPC
+
+  
