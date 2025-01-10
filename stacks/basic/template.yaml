@@ -37,6 +37,14 @@ Resources:
         InternetGateway: !GetAtt InternetGatewayStack.Outputs.InternetGateway
         VPC: !Ref VPC
 
+  SecurityStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Join [ '', [ !Ref TemplateURL, '/security.yaml' ] ]
+      Parameters:
+        AllowedCidrBlock: !Ref AllowedCidrBlock
+        VPC: !Ref VPC
+
   SubnetStack:
     DependsOn: [InternetGatewayStack, NetworkAclStack, RouteTableStack]
     Type: AWS::CloudFormation::Stack

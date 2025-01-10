@@ -1,0 +1,68 @@
+Parameters:
+  AllowedCidrBlock:
+    AllowedPattern: ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$
+    ConstraintDescription: must be a CIDR block range between x.x.x.x\16 and x.x.x.x\32
+    Description: The CIDR block range you want to allow to access the VPC (i.e. home / school I.P. address)
+    Type: String
+  VPC:
+    Type: String
+Resources:
+  # Security Groups
+  HTTPSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows communication over HTTP to and from the instance
+      GroupName: HTTP Security Group
+      VpcId: !Ref VPC
+  HTTPIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      CidrIp: 0.0.0.0/0
+      GroupId: !Ref HTTPSecurityGroup
+  HTTPEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 80
+      CidrIp: 0.0.0.0/0
+      GroupId: !Ref HTTPSecurityGroup
+  HTTPSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows communication over HTTPS to and from the instance
+      GroupName: HTTPS Security Group
+      VpcId: !Ref VPC
+  HTTPSIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: 0.0.0.0/0
+      GroupId: !Ref HTTPSSecurityGroup
+  HTTPSEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 443
+      ToPort: 443
+      CidrIp: 0.0.0.0/0
+      GroupId: !Ref HTTPSSecurityGroup
+  SSHSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows communication over SSH to the instance
+      GroupName: SSH Security Group
+      VpcId: !Ref VPC
+  SSHIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 22
+      ToPort: 22
+      CidrIp: !Ref AllowedCidrBlock
+      GroupId: !Ref SSHSecurityGroup
