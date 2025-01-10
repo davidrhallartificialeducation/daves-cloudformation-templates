@@ -12,13 +12,29 @@ Resources:
       MapPublicIpOnLaunch: true
       CidrBlock: 10.0.0.0/28
       VpcId: !Ref VPC
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      MapPublicIpOnLaunch: true
+      CidrBlock: 10.0.0.16/28
+      VpcId: !Ref VPC
   NetworkAclAssociation:
     Type: AWS::EC2::SubnetNetworkAclAssociation
     Properties:
       NetworkAclId: !Ref NetworkAcl
       SubnetId: !Ref PublicSubnet
+  NetworkAclAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      NetworkAclId: !Ref NetworkAcl
+      SubnetId: !Ref PublicSubnet2
   RouteAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref RouteTable
       SubnetId: !Ref PublicSubnet
+  RouteAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RouteTable
+      SubnetId: !Ref PublicSubnet2
